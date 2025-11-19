@@ -87,7 +87,7 @@ if __name__ == "__main__":
     redCar = new Car visible, with behavior BrakeCheckBehavior()
 
 
-    Given this scenic script, can you define a speed constant and integrate that with the brake check behavior? Respond with the new code.'''
+    Given this scenic script, can you define a speed constant and integrate that with the brake check behavior? Respond with the new scenic code.'''
 
 
     test_output = rag(context=context, question=query)
