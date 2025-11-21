@@ -5,28 +5,24 @@ from bs4 import BeautifulSoup
 import html2text
 from dotenv import load_dotenv
 
-class WebContextRetriever(dspy.Module):
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, urls: list[str] = None):
-        if urls:
-            context_passages = []  # Store all context in this array
-            for url in urls:
-                try:
-                    response = requests.get(url)
-                    response.raise_for_status() # Raise an exception for bad status codes
-                    soup = BeautifulSoup(response.text, 'html.parser') # Grab raw HTML text
-                    text_content = html2text.html2text(str(soup))  # Extract all HTML body Text and add to context
-                    context_passages.append(text_content)
-                except requests.exceptions.RequestException as e:
-                    print(f"Error fetching URL {url}: {e}")
-            
-            # Return context array
-            return context_passages
-        else:
-            # Return empty context array
-            return []
+def scrapeSites(urls):
+    if urls:
+        context_passages = []  # Store all context in this array
+        for url in urls:
+            try:
+                response = requests.get(url)
+                response.raise_for_status() # Raise an exception for bad status codes
+                soup = BeautifulSoup(response.text, 'html.parser') # Grab raw HTML text
+                text_content = html2text.html2text(str(soup))  # Extract all HTML body Text and add to context
+                context_passages.append(text_content)
+            except requests.exceptions.RequestException as e:
+                print(f"Error fetching URL {url}: {e}")
+        
+        # Return context array
+        return context_passages
+    else:
+        # Return empty context array
+        return []
 
 if __name__ == "__main__":
     # Load key
@@ -60,8 +56,7 @@ if __name__ == "__main__":
     # Initialize all necessary LM + rag objects
     lm = dspy.LM("openai/gpt-4o-mini", api_key=key)
     dspy.configure(lm=lm)
-    web_retriever = WebContextRetriever()
-    context = web_retriever(urls=urls)
+    context = scrapeSites(urls)
     rag = dspy.ChainOfThought("context, question -> response")
     
 
