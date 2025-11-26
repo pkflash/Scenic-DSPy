@@ -54,41 +54,21 @@ if __name__ == "__main__":
 
     ]
     # Initialize all necessary LM + rag objects
-    lm = dspy.LM("openai/gpt-4o-mini", api_key=key)
+    lm = dspy.LM("openai/gpt-5.1", temperature=1.0, max_tokens=20000, api_key=key)
     dspy.configure(lm=lm)
     context = scrapeSites(urls)
     rag = dspy.ChainOfThought("context, question -> response")
     
-
-    query = '''
-    model scenic.simulators.carla.model
-
-    behavior BrakeCheckBehavior():
-        while True:
-            # Move forward for a while
-            take SetThrottleAction(0.5)  # Move at half throttle
-            wait for 2 seconds  # Move for 2 seconds
-            # Brake suddenly
-            take SetBrakeAction(1)  # Full brake
-            wait for 1 seconds  # Brake for 1 second
-            # Resume normal speed
-            take SetThrottleAction(0.5)  # Resume moving
-            wait for 2 seconds  # Move for 2 seconds
-
-    # Define the ego vehicle
-    ego = new Car with behavior FollowLaneBehavior()
-
-    # Define the red car that will brake check
-    redCar = new Car visible, with behavior BrakeCheckBehavior()
+    while True:
+        query = input("Prompt the RAG model:")
 
 
-    Given this scenic script, can you define a speed constant and integrate that with the brake check behavior? Respond with the new scenic code.'''
+        test_output = rag(context=context, question=query)
+        print(test_output.response)
 
-
-    test_output = rag(context=context, question=query)
-    print(test_output)
-
-    # Write to script
-    with open("script.scenic", "w") as f:
-        f.write(test_output.response)
+        # Directly write to script.scenic for generation requests
+        if "Generate" in query:
+            # Write to script
+            with open("script.scenic", "w") as f:
+                f.write(test_output.response)
     
